@@ -1,0 +1,18 @@
+# Hack to ignore files with no extension
+*
+!*.*
+!*/
+
+# Normal
+*.sw?
+tags*
+CMakeFiles
+CMakeCache.txt
+*.cmake
+Makefile
+*.png
+*.mp4
+*.lines
+*.pyc
+*.bk2
+__*__
