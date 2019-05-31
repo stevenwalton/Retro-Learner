@@ -1,4 +1,4 @@
-# CIS 510: Multi-Agent Systems Project
+# Retro Learner
 --------------------------------------
 This project runs a basic Q Learner through OpenAI's retro environment. A few ROMs
 are provided with retro. By default the program will run Airstriker Genesis, which
