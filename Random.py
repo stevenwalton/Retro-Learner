@@ -4,15 +4,20 @@ import retro
 
 class RandomAgent(gym.Wrapper):
     def __init__(self, 
-                 game='Airstriker-Genesis',
+                 game,
+                 render,
+                 state,
+                 scenario,
+                 save,
                  max_episodes=1000,
-                 state=retro.State.DEFAULT,
-                 scenario=None):
+                 ):
         self.game = game
         self.max_episodes = max_episodes
         self.state = state
         self.scenario = scenario
         self.max_reward = -1 
+        self.render = render
+        self.save=save
 
     def act(self, observation, reward, done):
         return self.action_space.sample()
@@ -29,13 +34,16 @@ class RandomAgent(gym.Wrapper):
             ob = self.env.reset()
             while True:
                 action = self.act(ob, reward, done)
-                self.env.render()
+                if (self.render):
+                    self.env.render()
                 ob, reward, done, _ = self.env.step(action)
                 total_reward += reward
                 if done:
                     if total_reward > self.max_reward:
                         print("Current Max Reward:",total_reward)
                         self.max_reward = total_reward
+                        if (self.save is not None):
+                            print("Saving is not currently allowed")
                     total_reward = 0
                     reward = 0
                     break
