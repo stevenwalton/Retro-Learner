@@ -67,6 +67,8 @@ def arglist():
             help="Q Learning option: how we weight our exploration function. f(u,v) = u + k/v")
     learning_opts.add_argument('--gambler', default=0.8, type=np.float,
             help="Q Learning option: changes how often we explore random actions. The higher the number the less exploration we do. Values >=1 do not explore.")
+    parser.add_argument('-t','--time', default=False, action='store_true',
+            help="Show time between best actions")
                     
     return parser.parse_args()
 
@@ -105,11 +107,13 @@ def run_brute(game,
               scenario,
               save,
               fs_skip,
-              render):
+              render,
+              time,
+              ):
     '''
     Brute force algorithm to learn
     '''
-    b = B.BruteForce(game=game, state=state, scenario=scenario, save=save, fs_skip=fs_skip, render=render)
+    b = B.BruteForce(game=game, state=state, scenario=scenario, save=save, fs_skip=fs_skip, render=render,time=time)
     b.start()
 
 def run_random(game,
@@ -133,11 +137,12 @@ def run_q_agent(game,
                 max_depth,
                 gambler_percent,
                 timestep_limit,
+                time,
                 ):
     '''
     Runs our Q Learning algorithm
     '''
-    q = Q.QAgent(game=game, state=state, scenario=scenario, discount=discount, gamma=gamma, save=save, fs_skip=fs_skip, render=render, exploration_constant=exploration_constant, max_depth=max_depth,gambler_percent=gambler_percent, timestep_limit=timestep_limit)
+    q = Q.QAgent(game=game, state=state, scenario=scenario, discount=discount, gamma=gamma, save=save, fs_skip=fs_skip, render=render, exploration_constant=exploration_constant, max_depth=max_depth,gambler_percent=gambler_percent, timestep_limit=timestep_limit,time=time)
     q.start()
 
 def main():
@@ -147,11 +152,11 @@ def main():
     if(args.interactive): # Interactive game
         run_interactive(game=args.game, state=args.state, scenario=args.scenario)
     elif(args.brute): # Brute forcer (greedy solver)
-        run_brute(game=args.game, state=args.state, scenario=args.scenario, save=args.save, fs_skip=int(args.frame_skip), render=args.render)
+        run_brute(game=args.game, state=args.state, scenario=args.scenario, save=args.save, fs_skip=int(args.frame_skip), render=args.render,time=args.time)
     elif(args.random): # Random player
         run_random(game=args.game, state=args.state, scenario=args.scenario,render=args.render, save=args.save)
     elif(args.qlearn): # Simple Q learner
-        run_q_agent(game=args.game, state=args.state, scenario=args.scenario, discount=args.discount, gamma=args.gamma, save=args.save, fs_skip=args.frame_skip,render=args.render,exploration_constant=args.explore, max_depth=args.depth,gambler_percent=args.gambler,timestep_limit=args.timestep_limit)
+        run_q_agent(game=args.game, state=args.state, scenario=args.scenario, discount=args.discount, gamma=args.gamma, save=args.save, fs_skip=args.frame_skip,render=args.render,exploration_constant=args.explore, max_depth=args.depth,gambler_percent=args.gambler,timestep_limit=args.timestep_limit,time=args.time)
     else:
         print("==================================================")
         print("You must supply a method to interact with the game")

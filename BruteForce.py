@@ -1,3 +1,4 @@
+import time
 import retro
 
 import FrameSkip
@@ -14,7 +15,9 @@ class BruteForce():
                  save=False,
                  savename="best.bk2",
                  fs_skip=4,
-                 render=False):
+                 render=False,
+                 time=False,
+                 ):
 
         self.game = game
         self.max_episode_steps = max_episode_steps
@@ -25,6 +28,7 @@ class BruteForce():
         self.savename = savename
         self.fs_skip=fs_skip
         self.render=render
+        self.time=time
         if ".bk2" not in self.savename[-4:]:
             self.savename += ".bk2"
 
@@ -40,11 +44,15 @@ class BruteForce():
 
     def start(self):
         brute = Brute.Brute(self.env, max_episode_steps=self.max_episode_steps,render=self.render)
+        if self.time:
+            startTime = time.time()
         while True:
             acts, reward = brute.run()
             self.timesteps += len(acts)
             if reward > self.best_reward:
                 print(f"New best reward {reward} from {self.best_reward}")
+                if self.time:
+                    print(f"Elapsed time {time.time() - startTime}")
                 self.best_reward = reward
                 if (self.save):
                     self.env.unwrapped.record_movie(self.savename)

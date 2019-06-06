@@ -1,3 +1,4 @@
+import time
 import retro
 
 import FrameSkip
@@ -19,6 +20,7 @@ class QAgent():
                  gambler_percent,
                  timestep_limit,
                  max_episode_steps=4500,
+                 time=False,
                  ):
         self.game = game
         self.max_episode_steps = max_episode_steps
@@ -32,6 +34,7 @@ class QAgent():
         self.exploration_constant = exploration_constant
         self.max_depth = max_depth
         self.render=render
+        self.time=time
         if save is not None and ".bk2" not in self.save[-4:]:
             self.save+= ".bk2"
 
@@ -55,11 +58,15 @@ class QAgent():
                 gamma=self.gamma,
                 exploration_constant=self.exploration_constant, 
                 max_depth=self.max_depth)
+        if self.time:
+            startTime = time.time()
         while True:
             acts, reward = q.run()
             self.timesteps += len(acts)
             if reward > self.best_reward:
                 print(f"New best reward {reward} from {self.best_reward}")
+                if self.time:
+                    print(f"Elapsed time {time.time() - startTime}")
                 self.best_reward = reward
                 if (self.save is not None):
                     print("Saving",self.save)
