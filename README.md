@@ -5,6 +5,7 @@
 This project runs a basic Q Learner through OpenAI's retro environment. A few ROMs
 are provided with retro. By default the program will run Airstriker Genesis, which
 is one of the included ROMs. 
+
 ![airstriker-genesis playing](https://raw.githubusercontent.com/stevenwalton/Retro-Learner/master/Images/AG.gif)
 
 For the most basic run, use the command
