@@ -7,6 +7,7 @@ are provided with retro. By default the program will run Airstriker Genesis, whi
 is one of the included ROMs. 
 
 ![airstriker-genesis playing](https://raw.githubusercontent.com/stevenwalton/Retro-Learner/master/Images/AG.gif)
+![Super Mario Bros playing](https://raw.githubusercontent.com/stevenwalton/Retro-Learner/master/Images/SMB.gif)
 
 For the most basic run, use the command
 ```
