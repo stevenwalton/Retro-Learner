@@ -1,3 +1,5 @@
+import sys
+sys.path.append('src')
 import gym
 import retro
 import math

@@ -1,8 +1,10 @@
 # Retro Learner
 --------------------------------------
+[![docs](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/stevenwalton/Retro-Learner/LICENSE)
 This project runs a basic Q Learner through OpenAI's retro environment. A few ROMs
 are provided with retro. By default the program will run Airstriker Genesis, which
 is one of the included ROMs. 
+![airstriker-genesis playing](https://github.com/stevenwalton/Retro-Learner/Images/AG.gif)
 
 For the most basic run, use the command
 ```
