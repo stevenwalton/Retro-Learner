@@ -1,39 +1,117 @@
 '''
 Our Deep Q-Learning algo
 '''
-#import torch
+import time
+import retro
+import gym
+
+import torch
 import torch.nn as nn
+import torch.nn.functional as F
 #import torch.optim as optim
 #import torchvision.transforms as T
 
-class DQN(nn.Module):
-    '''
-    '''
-    def __init__(self, h, w, outputs):
-        super().__init__()
-        self.conv1 = nn.Conv2d(3,16, kernel_size=5, stride=2)
-        self.bn1 = nn.BatchNorm2d(16)
-        self.conv2 = nn.Conv2d(16,32, kernel_size=5, stride=2)
-        self.bn2 = nn.BatchNorm2d(32)
-        self.conv3 = nn.Conv2d(32,32, kernel_size=5, stride=2)
-        self.bn3 = nn.BatchNorm2d(32)
+import Node
+import utils
 
-        def conv2d_size_out(size, kernel_size=5, stride=2):
-            '''
-            Number of linear input connections depends on output of conv2d layers
-            and we need the imput image size
-            '''
-            return (size - (kernel_size - 1) - 1) // stride + 1
-        convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(w)))
-        convh = conv2d_size_out(conv2d_size_out(conv2d_size_out(h)))
-        linear_input_size = convw * convh * 32
-        self.head = nn.Linear(linear_input_size, outputs)
+class DQN_Net(nn.Module):
+    def __init__(self):
+        super(DQN_Net, self)__init__()
+        self.fc1 = nn.Linear(n_states, 50)
+        self.fc1.weight.data.normal_(0,0.1)
+        self.fc2 = nn.Linear(50,30)
+        self.fc2.weight.data.normal_(0,0.1)
+        self.out = nn.Linear(30, n_actions)
+        self.out.weight.data.normal_(0,0.1)
 
     def forward(self, x):
-        '''
-        '''
-        x = F.relu(self.bn1(self.conv1(x)))
-        x = F.relu(self.bn2(self.conv2(x)))
-        x = F.relu(self.bn3(self.conv3(x)))
-        return self.head(x.view(x.size(0), -1))
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.fc2(x)
+        x = F.relu(x)
+        return self.out(x)
 
+class DQN:
+    def __init__(self,
+                 env,
+                 max_episode_steps,
+                 render,
+                 discount,
+                 gamma,
+                 ):
+        self.node_count = 1
+        self.root = Node.Node()
+        self.env = env
+        self.max_episode_steps = max_episode_steps
+        self.render = render
+        self.discount = discount
+        self.gamma = gamma
+        
+    def run(self):
+        acts = self.select_actions()
+        steps, total_rewards = utils.rollout(acts)
+        executed_acts = acts[:steps]
+        self.node_count += utils.update_tree(executed_acts, total_rewards)
+        return executed_acts, total_rewards
+
+class DQNAgent():
+    def __init__(self,
+                 game,
+                 state,
+                 scenario,
+                 discount,
+                 gamma,
+                 save,
+                 fs_skip,
+                 render,
+                 timestep_limit,
+                 max_episode_steps=4500,
+                 time=False,
+                 ):
+        self.game = game
+        self.max_episode_steps = max_episode_steps
+        self.timestep_limit = int(timestep_limit)
+        self.state = state
+        self.discount = discount
+        self.gamma = gamma
+        self.scenario = scenario
+        self.save = save
+        self.render = render
+        self.time = time
+        if save is not None and ".bk2" not in save.save[-4:]:
+            save.save += ".bk2"
+
+        self.timesteps = 0
+        self.best_reward = float('-inf')
+
+        self.env = retro.make(game=game,
+                              state=state,
+                              use_restricted_actions=retro.Actions.DISCRETE,
+                              scenario=scenario)
+        if fs_skip > 0:
+            self.env = FrameSkip.Frameskip(self.env, skip=fs_skip)
+        self.env = TimeLimit.TimeLimit(self.env,
+                                       max_episode_steps=max_episode_steps)
+
+    def start(self):
+        dqn = DQN(pass)
+        if self.time:
+            startTime = time.time()
+        while True:
+            acts, reward = dqn.run()
+            self.timesteps += len(acts)
+            if reward > self.best_reward:
+                print(f"New best reward {reward} from {self.best_reward}")
+                if self.time:
+                    print(f"Elapsed time {time.time() - startTime}")
+                self.best_reward = reward
+                if self.save is not None:
+                    print("Saving {self.save}")
+                    self.env.unwrapped.record_movie(self.save)
+                    self.env.reset()
+                    for act in acts:
+                        self.env.step(act)
+                    self.env.unwrapped.stop_record()
+            if self.timesteps > self.timestep_limit:
+                print("Timed out")
+                break
