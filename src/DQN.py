@@ -5,6 +5,8 @@ import time
 import retro
 import gym
 
+import numpy as np
+import random
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -38,6 +40,7 @@ class DQN:
                  render,
                  discount,
                  gamma,
+                 lr=0.01,
                  ):
         self.node_count = 1
         self.root = Node.Node()
@@ -46,6 +49,9 @@ class DQN:
         self.render = render
         self.discount = discount
         self.gamma = gamma
+        self.eval_net, self.target_net = DQN_Net(), DQN_Net()
+        self.optimizer = torch.optim.Adam(self.eval_net.parameters(), lr=lr)
+        self.loss_func = nn.MSELoss()
         
     def run(self):
         acts = self.select_actions()
@@ -53,6 +59,44 @@ class DQN:
         executed_acts = acts[:steps]
         self.node_count += utils.update_tree(executed_acts, total_rewards)
         return executed_acts, total_rewards
+
+    def update_values(self, node, value,step):
+        ''' neural net goes here '''
+        step += 1
+
+    def select_actions(self, state):
+        #####
+        ### Don't store in nodes. Just store the net with torch.save
+        ###
+        node = self.root
+        acts = []
+        steps = 0
+        while steps < self.max_episode_steps:
+            if node is None:
+                act = self.env.action_space.sample()
+            else:
+                if random.random() > self.gambler_percent:
+                    act = self.env.action_space.sample()
+                else:
+                    act_value = {}
+                    for act in range(self.env.action_space.n):
+                        if node is not None and act in node.children:
+                            act_value[act] = self.update_values(node,0,0)
+                        else:
+                            act_value[act] = -np.inf
+                    best_value = max(act_value.values())
+                    best_acts = [
+                            act for act, value in act_value.items() if value ==
+                            best_value
+                            ]
+                    act = random.choice(best_act)
+                if act in node.children:
+                    node = node.children[act]
+                else:
+                    node = None
+            acts.append(act)
+            steps += 1
+        return acts
 
 class DQNAgent():
     def __init__(self,
@@ -92,7 +136,10 @@ class DQNAgent():
             self.env = FrameSkip.Frameskip(self.env, skip=fs_skip)
         self.env = TimeLimit.TimeLimit(self.env,
                                        max_episode_steps=max_episode_steps)
+        self.num_states = env.observation_space.shape[0]
+        self.num_actions = env.actions_space.n
 
+        
     def start(self):
         dqn = DQN(pass)
         if self.time:
